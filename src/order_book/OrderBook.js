@@ -7,8 +7,9 @@ class OrderBook {
     constructor() {}
 
     limitBuy(volume, value) {
-        const [remainingBuyVolume, [remainingSellVolume, remainingSellValue]] = this.#takeSell(
-            volume,
+        const remainingBuyVolumeAfterMarketSell = this.#takeMarketSellOrders(volume);
+        const remainingBuyVolume = this.#takeLimitSellOrders(
+            remainingBuyVolumeAfterMarketSell,
             value,
         );
 
@@ -19,23 +20,13 @@ class OrderBook {
                 volume: remainingBuyVolume,
                 value,
             });
-        } else if (remainingSellVolume && remainingSellValue) {
-            this.#sellOrders.unshift({
-                operation: OPERATION.SELL,
-                type: TYPE.LIMIT,
-                volume: remainingSellVolume,
-                value: remainingSellValue,
-            });
         }
 
         this.#buyOrders.sort((a, b) => b.value - a.value);
     }
 
     marketBuy(volume) {
-        const [remainingBuyVolume, [remainingSellVolume, remainingSellValue]] = this.#takeSell(
-            volume,
-            Number.MAX_SAFE_INTEGER,
-        );
+        const remainingBuyVolume = this.#takeLimitSellOrders(volume, Number.MAX_SAFE_INTEGER);
 
         if (remainingBuyVolume) {
             this.#marketBuyOrders.push({
@@ -47,8 +38,9 @@ class OrderBook {
     }
 
     limitSell(volume, value) {
-        const [remainingSellVolume, [remainingBuyVolume, remainingBuyValue]] = this.#takeBuy(
-            volume,
+        const remainingSellVolumeAfterMarketBuy = this.#takeMarketBuyOrders(volume);
+        const remainingSellVolume = this.#takeLimitBuyOrders(
+            remainingSellVolumeAfterMarketBuy,
             value,
         );
 
@@ -59,23 +51,13 @@ class OrderBook {
                 volume: remainingSellVolume,
                 value,
             });
-        } else if (remainingBuyVolume && remainingBuyValue) {
-            this.#buyOrders.unshift({
-                operation: OPERATION.BUY,
-                type: TYPE.LIMIT,
-                volume: remainingBuyVolume,
-                value: remainingBuyValue,
-            });
         }
 
         this.#sellOrders.sort((a, b) => a.value - b.value);
     }
 
     marketSell(volume) {
-        const [remainingSellVolume, [remainingBuyVolume, remainingBuyValue]] = this.#takeBuy(
-            volume,
-            0,
-        );
+        const remainingSellVolume = this.#takeLimitBuyOrders(volume, 0);
 
         if (remainingSellVolume) {
             this.#marketSellOrders.push({
@@ -102,10 +84,9 @@ class OrderBook {
         return this.#marketSellOrders;
     }
 
-    #takeSell(volume, value) {
+    #takeLimitSellOrders(volume, value) {
         let remainingBuyVolume = volume,
-            remainingSellVolume,
-            remainingSellValue;
+            remainingSellVolume;
 
         this.#sellOrders = this.#sellOrders.filter((order) => {
             if (remainingBuyVolume === 0) {
@@ -115,23 +96,52 @@ class OrderBook {
             if (value >= order.value) {
                 if (remainingBuyVolume >= order.volume) {
                     remainingBuyVolume -= order.volume;
+                    return false;
                 } else {
                     remainingSellVolume = order.volume - remainingBuyVolume;
-                    remainingSellValue = order.value;
                     remainingBuyVolume = 0;
+                    return true;
                 }
-                return false;
             }
             return true;
         });
 
-        return [remainingBuyVolume, [remainingSellVolume, remainingSellValue]];
+        if (remainingSellVolume) {
+            this.#sellOrders[0].volume = remainingSellVolume;
+        }
+
+        return remainingBuyVolume;
     }
 
-    #takeBuy(volume, value) {
+    #takeMarketSellOrders(volume) {
+        let remainingBuyVolume = volume,
+            remainingSellVolume;
+
+        this.#marketSellOrders = this.#marketSellOrders.filter((order) => {
+            if (remainingBuyVolume === 0) {
+                return true;
+            }
+
+            if (remainingBuyVolume >= order.volume) {
+                remainingBuyVolume -= order.volume;
+                return false;
+            } else {
+                remainingSellVolume = order.volume - remainingBuyVolume;
+                remainingBuyVolume = 0;
+                return true;
+            }
+        });
+
+        if (remainingSellVolume) {
+            this.#marketSellOrders[0].volume = remainingSellVolume;
+        }
+
+        return remainingBuyVolume;
+    }
+
+    #takeLimitBuyOrders(volume, value) {
         let remainingSellVolume = volume,
-            remainingBuyVolume,
-            remainingBuyValue;
+            remainingBuyVolume;
 
         this.#buyOrders = this.#buyOrders.filter((order) => {
             if (remainingSellVolume === 0) {
@@ -141,17 +151,47 @@ class OrderBook {
             if (value <= order.value) {
                 if (remainingSellVolume >= order.volume) {
                     remainingSellVolume -= order.volume;
+                    return false;
                 } else {
                     remainingBuyVolume = order.volume - remainingSellVolume;
-                    remainingBuyValue = order.value;
                     remainingSellVolume = 0;
+                    return true;
                 }
-                return false;
             }
             return true;
         });
 
-        return [remainingSellVolume, [remainingBuyVolume, remainingBuyValue]];
+        if (remainingBuyVolume) {
+            this.#buyOrders[0].volume = remainingBuyVolume;
+        }
+
+        return remainingSellVolume;
+    }
+
+    #takeMarketBuyOrders(volume) {
+        let remainingSellVolume = volume,
+            remainingBuyVolume;
+
+        this.#marketBuyOrders = this.#marketBuyOrders.filter((order) => {
+            if (remainingSellVolume === 0) {
+                return true;
+            }
+
+            if (remainingSellVolume >= order.volume) {
+                remainingSellVolume -= order.volume;
+                return false;
+            } else {
+                remainingBuyVolume = order.volume - remainingSellVolume;
+                remainingSellVolume = 0;
+                return true;
+            }
+        });
+
+        if (remainingBuyVolume) {
+            this.#marketBuyOrders[0].volume = remainingBuyVolume;
+        }
+
+        return remainingSellVolume;
     }
 }
 
