@@ -33,7 +33,6 @@ class DexServer {
         }, 1000);
 
         service.on("request", (rid, key, payload, handler) => {
-            console.log("got request");
             let response;
 
             if (key === SERVICE.GET_DUMP) {
@@ -51,7 +50,7 @@ class DexServer {
     }
 
     #sendOrder(order) {
-        console.log("server: ", order);
+        // should not register orders created by this client
         // this.#orderBook.registerOrder(order);
     }
 }
