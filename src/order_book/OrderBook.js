@@ -1,3 +1,5 @@
+"use strict";
+
 class OrderBook {
     #buyOrders = [];
     #marketBuyOrders = [];
@@ -107,6 +109,13 @@ class OrderBook {
             sellOrders: this.getSellOrders(),
             marketSellOrders: this.getMarketSellOrders(),
         };
+    }
+
+    loadDump(dump) {
+        this.#buyOrders = dump.buyOrders;
+        this.#marketBuyOrders = dump.marketBuyOrders;
+        this.#sellOrders = dump.sellOrders;
+        this.#marketSellOrders = dump.marketSellOrders;
     }
 
     #takeLimitSellOrders(volume, value) {

@@ -1,3 +1,5 @@
+"use strict";
+
 const chalk = require("chalk");
 const prompt = require("prompt-sync")({ sigint: true });
 

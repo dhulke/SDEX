@@ -17,7 +17,7 @@ peer.init();
 function getInput() {
     const number = Prompt.input();
     const payload = { number };
-    peer.map("fibonacci_worker3", payload, { timeout: 100000 }, (err, result) => {
+    peer.map("fibonacci_worker", payload, { timeout: 100000 }, (err, result) => {
         if (err) throw err;
         Prompt.output(
             `Fibonacci number at place ${payload.number} in the sequence: ${result.length}`,
@@ -27,3 +27,9 @@ function getInput() {
 }
 
 getInput();
+
+// peer.request(SERVICE.GET_DUMP, "", { timeout: 100000 }, (err, result) => {
+//     if (err) throw err;
+//     Prompt.output(JSON.stringify(result, null, 2));
+//     getInput();
+// });
