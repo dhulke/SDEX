@@ -70,3 +70,7 @@ The first way of implementing this solution would make for a very reliable order
 The second implementation doesn't keep orders in sync and different nodes would end up having different orders in their order books. To avoid double spending problems we'd have to rely on the consensus algorithm of a backing blockchain. Every order matched would have to be made into a blockchain transaction and confirmed there. If failed, it would be removed from the current node's order book. This is more or less how the 0x protocol works.
 
 My implementation doesn't have a consensus algorithm backing it and so it is fundamentally flaud, but I believe it serves the purpose of the excercise.
+
+# Addendum
+
+On a second thought, I wouldn't have announced 2 services but instead announced only one called orderbook and expected the payload to select the service.
