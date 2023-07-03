@@ -1,8 +1,8 @@
 class OrderBook {
-    #marketBuyOrders = [];
     #buyOrders = [];
-    #marketSellOrders = [];
+    #marketBuyOrders = [];
     #sellOrders = [];
+    #marketSellOrders = [];
 
     constructor() {}
 
@@ -68,6 +68,22 @@ class OrderBook {
         }
     }
 
+    registerOrder(order) {
+        if (order.operation === OPERATION.BUY) {
+            if (order.type === TYPE.LIMIT) {
+                this.limitBuy(order.volume, order.value);
+            } else {
+                this.marketBuy(order.volume);
+            }
+        } else {
+            if (order.type === TYPE.LIMIT) {
+                this.limitSell(order.volume, order.value);
+            } else {
+                this.marketSell(order.volume);
+            }
+        }
+    }
+
     getBuyOrders() {
         return this.#buyOrders;
     }
@@ -82,6 +98,15 @@ class OrderBook {
 
     getMarketSellOrders() {
         return this.#marketSellOrders;
+    }
+
+    getDump() {
+        return {
+            buyOrders: this.getBuyOrders(),
+            marketBuyOrders: this.getMarketBuyOrders(),
+            sellOrders: this.getSellOrders(),
+            marketSellOrders: this.getMarketSellOrders(),
+        };
     }
 
     #takeLimitSellOrders(volume, value) {

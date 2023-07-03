@@ -3,8 +3,6 @@
 const Link = require("grenache-nodejs-link");
 const { PeerRPCServer } = require("grenache-nodejs-ws");
 
-console.log("Server", process.argv[2]);
-
 function fibonacci(n) {
     if (n <= 1) {
         return 1;
@@ -22,13 +20,15 @@ const peer = new PeerRPCServer(link, {});
 peer.init();
 
 const service = peer.transport("server");
-service.listen(Number(process.argv[3]) || 1337);
+service.listen(1337);
 
 setInterval(() => {
     link.announce("fibonacci_worker", service.port, {});
+    link.announce("fibonacci_worker2", service.port, {});
 }, 1000);
 
 service.on("request", (rid, key, payload, handler) => {
+    console.log(rid, key, payload, handler);
     const result = fibonacci(payload.number);
-    handler.reply(null, `${process.argv[2]} - ${result}`);
+    handler.reply(null, result);
 });

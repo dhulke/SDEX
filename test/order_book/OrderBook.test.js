@@ -460,4 +460,41 @@ describe("OrderBook", function () {
             ]);
         });
     });
+
+    describe("getDump", function () {
+        it("should return all market and limit orders", function () {
+            const orderBook = new OrderBook();
+            orderBook.registerOrder({
+                operation: OPERATION.BUY,
+                type: TYPE.LIMIT,
+                volume: 10,
+                value: 20,
+            });
+            orderBook.registerOrder({
+                operation: OPERATION.SELL,
+                type: TYPE.LIMIT,
+                volume: 10,
+                value: 30,
+            });
+            orderBook.registerOrder({
+                operation: OPERATION.BUY,
+                type: TYPE.MARKET,
+                volume: 5,
+            });
+            orderBook.registerOrder({
+                operation: OPERATION.SELL,
+                type: TYPE.MARKET,
+                volume: 5,
+            });
+
+            const dump = orderBook.getDump();
+
+            expect(dump).to.deep.equal({
+                buyOrders: [{ operation: OPERATION.BUY, type: TYPE.LIMIT, volume: 5, value: 20 }],
+                marketBuyOrders: [],
+                sellOrders: [{ operation: OPERATION.SELL, type: TYPE.LIMIT, volume: 5, value: 30 }],
+                marketSellOrders: [],
+            });
+        });
+    });
 });
