@@ -1,8 +1,8 @@
 # Install
 
 ```
-$ git clone ...
-$ cd ...
+$ git clone git@github.com:dhulke/SDEX.git
+$ cd SDEX
 $ npm install
 ```
 
