@@ -6,6 +6,12 @@ $ cd SDEX
 $ npm install
 ```
 
+# Testing
+
+```
+$ npm run test
+```
+
 # Running (quick demo)
 
 Start the grape nodes
