@@ -52,6 +52,7 @@ class DexServer {
     #sendOrder(order) {
         // should not register orders created by this client
         // this.#orderBook.registerOrder(order);
+        console.log("server:", order);
     }
 }
 
